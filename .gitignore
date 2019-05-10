@@ -1,0 +1,11 @@
+*.py[c|d|x]
+*.obj
+*.png
+*.jpg
+*.jpeg
+*.txt
+
+!*.py
+!*.cpp
+!*.h
+!*.md
