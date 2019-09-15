@@ -58,7 +58,7 @@ def main(restore=False, pretrain_model_path="", layers="all"):
                               num_workers=threads,
                               pin_memory=True)
     ## load test data
-    valid_ds = cfg_data_loader(cfg.DATA.DATASET)("train", cfg)
+    valid_ds = cfg_data_loader(cfg.DATA.DATASET)("test", cfg)
     valid_loader = DataLoader(valid_ds, batch_size,
                               sampler=SequentialSampler(valid_ds),
                               num_workers=threads,
