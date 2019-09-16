@@ -3,7 +3,7 @@
 # File              : utils/config.py
 # Author            : Hai-Yong Jiang <haiyong.jiang1990@hotmail.com>
 # Date              : 19.08.2018
-# Last Modified Date: 10.05.2019
+# Last Modified Date: 16.09.2019
 # Last Modified By  : Hai-Yong Jiang <haiyong.jiang1990@hotmail.com>
 ## **************************************************************************
 from easydict import EasyDict as edict
@@ -12,6 +12,7 @@ import os
 ## PLEASE KEEP THE IMPORTING ORDER OF torch and tensorflow, otherwise memory corrpution will be reported.
 import torch
 import tensorflow as tf
+import numpy as np
 
 ## basic configurations
 cfg = edict()
@@ -22,18 +23,23 @@ cfg.LOSS = edict()
 cfg.LOG = edict()
 
 cfg.DATA.RES_LOG_PATH = "../outputs/logs/"
-cfg.DATA.ROOT_PATH = "../data/crowdai/train/polygons_interp/"
+cfg.DATA.ROOT_PATH = "../data/"
 cfg.DATA.NSAMPLE_TRAIN = 10240
 cfg.DATA.NSAMPLE_VAL = 1024
 cfg.DATA.NSAMPLE_TEST = 512
-cfg.DATA.DATASET = "None"
+cfg.DATA.DATASET = "default"
 
 cfg.MODEL.IDENTIFIER = 'xx'
 cfg.MODEL.TF_LOG_SETTING = 'xx'
 cfg.MODEL.TIME_STAMP = ""
 cfg.MODEL.COMMENTS = ""
-cfg.MODEL.NET = "None"
+cfg.MODEL.NET = "default"
 cfg.MODEL.TRAINER = "Predictor"
+cfg.MODEL.iEPOCH = 0
+cfg.MODEL.BN = "BN" ##[BN, INST_BN, RE_BN]
+cfg.MODEL.BN_DECAY = 0.1
+cfg.MODEL.USE_BN_DECAY = False
+cfg.MODEL.VAL_EPOECH_FREQ = 1
 
 cfg.GPU_IDS = '0'
 cfg.VERBOSE = False
@@ -45,6 +51,7 @@ cfg.OPTM.LR_SCHEDULER = "ReduceLROnPlateau"
 #### {"milestones": [2000, 3500, 4500, 5000], "gamma":0.1} for multiple steps
 cfg.OPTM.LR_SCHEDULER_PARAM = {"factor": 0.3, "patience":8,
                                "cooldown":0, "min_lr": 1e-8}
+cfg.OPTM.OPTIMIZER = "ADAM"
 cfg.OPTM.BATCH_SIZE = 32
 cfg.OPTM.EPOCHS = 500
 cfg.OPTM.EARLY_STOPPING = True
@@ -103,7 +110,7 @@ def cfg_print():
     tf.logging.info("IDENTIFIER: " + cfg.MODEL.IDENTIFIER)
     tf.logging.info("COMMENTS: " + cfg.MODEL.COMMENTS)
 
-    tf.logging.info("Data:", cfg.DATA.DATASET)
+    tf.logging.info("Data:" + cfg.DATA.DATASET)
     tf.logging.info(cfg.DATA)
 
     tf.logging.info("OPTM: ")
@@ -132,11 +139,15 @@ def cfg_net_module(name):
 
 def cfg_data_loader(name):
     dataset_dict = {}
+    from nn.loader import BP4DDb
+    dataset_dict["BP4D"] = BP4DDb
+
     return dataset_dict[name]
 
 def cfg_trainer_module(name):
     from nn.predictor import Predictor
     model_dict = {"predictor": Predictor,
+                  #  "aupredictor": AUPredictor
                   }
     return model_dict[name]
 
